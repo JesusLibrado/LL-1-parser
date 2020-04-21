@@ -77,7 +77,7 @@
         );
     }
 
-    int firs_exprP(int input) {
+    int first_exprP(int input) {
         return (
             input == ADDITION_TOKEN ||
             input == SUBSTRACTION_TOKEN ||
@@ -158,12 +158,21 @@ int expresion();
 int currentToken;
 
 void debug(char *non_terminal){
-    printf("*** %s \t\t\t | text=%s [token: %d] at line: %d\n", non_terminal, yytext, currentToken, yylineno);
+    printf("*** %s \t\t | text=%s [token: %d] at line: %d\n", non_terminal, yytext, currentToken, yylineno);
 }
 
 int syntaxError(){
-    printf("Syntax error (text=%s) at line: %d\n", yytext, yylineno);
+    if(currentToken != CLOSE_CURLY_BRACKET)
+        printf("Syntax error (text=%s) at line: %d\n", yytext, yylineno);
     return 0;
+}
+
+int expresion() {
+    return (
+        (expr() && yylex()==LT_TOKEN && expr()) ||
+        (expr() && yylex()==GT_TOKEN && expr()) ||
+        (expr() && yylex()==EQUAL_TOKEN && expr())
+    );
 }
 
 int factor() {
@@ -178,6 +187,7 @@ int factor() {
 int termP() {
     currentToken = yylex();
     if(first_termP(currentToken)) {
+        currentToken = yylex();
         debug("term' -> {*, /}");
         return (factor() && termP());
     } else return 1;
@@ -190,10 +200,15 @@ int term() {
 
 int exprP(){
     debug("expr'");
-    return 1;
+    if(first_exprP(currentToken)){
+        debug("expr' -> {+, -}");
+        currentToken = yylex();
+        return (term() && exprP());
+    } else return 1; 
 }
 
 int expr(){
+    currentToken = yylex();
     debug("expr");
     return (term() && exprP());
 }
@@ -203,13 +218,16 @@ int instr(){
         return 1;
     if(first_stmt(currentToken)){
         debug("instr -> stmt ;");
-        return (stmt() && (yylex() == SEMICOLON_TOKEN));
+        return (stmt() && (currentToken == SEMICOLON_TOKEN));
     } else return syntaxError();
 }
 
 int stmt_lstP() {
-    debug("stmt_lst'");
-    return (instr() && stmt_lstP()) || 1;
+    if(first_stmt_lstP(currentToken)) {
+        currentToken = yylex();
+        debug("stmt_lst'");
+        return (instr() && stmt_lstP());
+    } else return 1;
 } 
 
 int stmt_lst() {
@@ -234,7 +252,7 @@ int opt_stmts() {
                 currentToken = yylex();
                 debug("opt_stmts -> {stmt}");
             }
-            return (yylex() == CLOSE_CURLY_BRACKET);
+            return (currentToken == CLOSE_CURLY_BRACKET);
         } else {
             return syntaxError();
         }
