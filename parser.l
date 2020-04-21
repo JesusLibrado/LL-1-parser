@@ -115,7 +115,7 @@
 "program"						{return PROGRAM_TOKEN;}
 "set"							{return SET_TOKEN;}
 "if"							{return IF_TOKEN;}
-"else"							{return IFELSE_TOKEN;}
+"ifelse"							{return IFELSE_TOKEN;}
 "while"							{return WHILE_TOKEN;}
 "+"								{return ADDITION_TOKEN;}
 "-"								{return SUBSTRACTION_TOKEN;}
@@ -158,7 +158,7 @@ int expresion();
 int currentToken;
 
 void debug(char *non_terminal){
-    printf("*** %s \t\t | text=%s [token: %d] at line: %d\n", non_terminal, yytext, currentToken, yylineno);
+    //printf("*** %s \t\t | text=%s [token: %d] at line: %d\n", non_terminal, yytext, currentToken, yylineno);
 }
 
 int syntaxError(){
@@ -254,7 +254,7 @@ int opt_stmts() {
                 currentToken = yylex();
                 debug("opt_stmts -> {stmt}");
             }
-            return (currentToken == CLOSE_CURLY_BRACKET && !yylex());
+            return (currentToken == CLOSE_CURLY_BRACKET || !yylex());
         } else {
             return syntaxError();
         }
@@ -275,8 +275,8 @@ int stmt() {
         }
     } if(currentToken == IFELSE_TOKEN){
         currentToken = yylex();
+        debug("stmt -> ifelse");
         if(expresion()){
-            currentToken = yylex();
             return (currentToken == CLOSE_PARENTHESIS && opt_stmts() && opt_stmts());
         }
     } else return syntaxError();
