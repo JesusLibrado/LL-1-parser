@@ -1996,27 +1996,58 @@ int expresion();
 
 int currentToken;
 
+void debug(char *non_terminal){
+    printf("*** %s \t\t\t | text=%s [token: %d] at line: %d\n", non_terminal, yytext, currentToken, yylineno);
+}
+
 int syntaxError(){
-    printf("Syntax error (%s) at line: %d\n", yytext, yylineno);
+    printf("Syntax error (text=%s) at line: %d\n", yytext, yylineno);
     return 0;
 }
 
+int factor() {
+    debug("factor");
+    return (
+        currentToken == IDENTIFIER_TOKEN ||
+        currentToken == NUMBER_TOKEN ||
+        (currentToken == OPEN_PARENTHESIS && expr() && yylex() == CLOSE_PARENTHESIS)
+    );
+}
+
+int termP() {
+    currentToken = yylex();
+    if(first_termP(currentToken)) {
+        debug("term' -> {*, /}");
+        return (factor() && termP());
+    } else return 1;
+}
+
+int term() {
+    debug("term");
+    return (factor() && termP());
+}
+
+int exprP(){
+    debug("expr'");
+    return 1;
+}
+
 int expr(){
-    printf("EXP: %s: %d token, line: %d\n", yytext, currentToken, yylineno);
-    return 0;
+    debug("expr");
+    return (term() && exprP());
 }
 
 int instr(){
     if(currentToken==SEMICOLON_TOKEN)
         return 1;
     if(first_stmt(currentToken)){
-        printf("INSTR: %s: %d token, line: %d\n", yytext, currentToken, yylineno);
+        debug("instr -> stmt ;");
         return (stmt() && (yylex() == SEMICOLON_TOKEN));
     } else return syntaxError();
 }
 
 int stmt_lstP() {
-    printf("AT STMT_LST_P: %s: %d, line: %d\n", yytext, currentToken, yylineno);
+    debug("stmt_lst'");
     return (instr() && stmt_lstP()) || 1;
 } 
 
@@ -2028,18 +2059,21 @@ int stmt_lst() {
 
 int opt_stmts() {
     currentToken = yylex();
-    
     if(first_instr(currentToken)){
+        debug("opt_stmts -> instr");
         return instr();
     } if(first_opt_stmts(currentToken)){
         currentToken = yylex();
         if(currentToken == CLOSE_CURLY_BRACKET){
+            debug("opt_stmts -> {}");
             return 1;
         }
         if(first_stmt_lst(currentToken)){
-            if(stmt_lst()){
-                return (yylex() == CLOSE_CURLY_BRACKET);
+            while(stmt_lst()){
+                currentToken = yylex();
+                debug("opt_stmts -> {stmt}");
             }
+            return (yylex() == CLOSE_CURLY_BRACKET);
         } else {
             return syntaxError();
         }
@@ -2050,18 +2084,15 @@ int opt_stmts() {
 
 int stmt() {
     if(currentToken == SET_TOKEN){
-        printf("SET: %s: %d token, line: %d\n", yytext, currentToken, yylineno);
         currentToken = yylex();
         return expr();
     } if(currentToken == IF_TOKEN){
-        printf("IF: %s: %d token, line: %d\n", yytext, currentToken, yylineno);
         currentToken = yylex();
         if(1){ //expresion
             currentToken = yylex();
             return (currentToken == CLOSE_PARENTHESIS && opt_stmts());
         }
     } if(currentToken == IFELSE_TOKEN){
-        printf("IFELSE: %s: %d token, line: %d\n", yytext, currentToken, yylineno);
         currentToken = yylex();
         if(1){//expresion
             currentToken = yylex();
