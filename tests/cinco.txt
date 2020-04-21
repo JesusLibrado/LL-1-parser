@@ -1,4 +1,4 @@
-923923 cinco
+program cinco
 {
    set x 2;
    set x 3;

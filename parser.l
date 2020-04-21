@@ -22,6 +22,7 @@
     #define OPEN_PARENTHESIS 18
     #define CLOSE_PARENTHESIS 19
     #define SEMICOLON_TOKEN 20
+    #define EPSILON_TOKEN 21
 
     #define OTHER_TOKEN -1
 
@@ -42,13 +43,22 @@
         return (
             input == OPEN_CURLY_BRACKET || 
             input == SEMICOLON_TOKEN ||  
-            first_stmt(input);
+            first_stmt(input)
         );
     }
 
     int first_stmt_lst(int input) {
         return (
-            
+            input == SEMICOLON_TOKEN ||  
+            first_stmt(input)
+        );
+    }
+
+    int first_stmt_lstP(int input) {
+        return (
+            input == SEMICOLON_TOKEN ||  
+            input == EPSILON_TOKEN ||  
+            first_stmt(input)
         );
     }
 
