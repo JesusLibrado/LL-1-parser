@@ -168,10 +168,11 @@ int syntaxError(){
 }
 
 int expresion() {
+    debug("expresion");
     return (
-        (expr() && yylex()==LT_TOKEN && expr()) ||
-        (expr() && yylex()==GT_TOKEN && expr()) ||
-        (expr() && yylex()==EQUAL_TOKEN && expr())
+        (expr() && currentToken==LT_TOKEN && expr()) ||
+        (expr() && currentToken==GT_TOKEN && expr()) ||
+        (expr() && currentToken==EQUAL_TOKEN && expr())
     );
 }
 
@@ -238,6 +239,7 @@ int stmt_lst() {
 
 int opt_stmts() {
     currentToken = yylex();
+    debug("opt_stmts");
     if(first_instr(currentToken)){
         debug("opt_stmts -> instr");
         return instr();
@@ -252,7 +254,7 @@ int opt_stmts() {
                 currentToken = yylex();
                 debug("opt_stmts -> {stmt}");
             }
-            return (currentToken == CLOSE_CURLY_BRACKET);
+            return (currentToken == CLOSE_CURLY_BRACKET && !yylex());
         } else {
             return syntaxError();
         }
@@ -267,13 +269,13 @@ int stmt() {
         return expr();
     } if(currentToken == IF_TOKEN){
         currentToken = yylex();
-        if(1){ //expresion
-            currentToken = yylex();
+        debug("stmt -> if");
+        if(expresion()){
             return (currentToken == CLOSE_PARENTHESIS && opt_stmts());
         }
     } if(currentToken == IFELSE_TOKEN){
         currentToken = yylex();
-        if(1){//expresion
+        if(expresion()){
             currentToken = yylex();
             return (currentToken == CLOSE_PARENTHESIS && opt_stmts() && opt_stmts());
         }

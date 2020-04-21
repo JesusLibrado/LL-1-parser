@@ -4,4 +4,5 @@ program cuatro
   set y 3;
   if (x < 2)
      set z x*y;
+  
 }
