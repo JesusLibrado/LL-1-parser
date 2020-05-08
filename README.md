@@ -7,7 +7,12 @@ Homework #3 for Compilers Design course. Given a Context Free grammar,
 
 ## Compiling and running
 
+```
+lex recognizer.l
+gcc lex.yy.c -o recognizer
+./recognizer < tests/test_number_file.txt
 
+```
 
 ## Context Free Grammar
 
