@@ -299,9 +299,9 @@ int main(int argc, char **argv) {
 	}
 
     if(progr()){
-        printf("\nSi\n");
+        printf("\nTrue\n");
     }else{
-        printf("\nNo\n");
+        printf("\nFalse\n");
     }
 
 }
