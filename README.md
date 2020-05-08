@@ -5,6 +5,22 @@ Homework #3 for Compilers Design course. Given a Context Free grammar,
 * code a syntax recognizer which indicates if a program belongs to the given Context Free grammar.
 * Use Flex and C++.
 
+## Compiling and running
+
+
+
 ## Context Free Grammar
 
 ![](cfg.png)
+
+## Leftmost derivation
+
+![](ld.png)
+
+## FIRST table
+
+![](first.png)
+
+## FOLLOW table
+
+![](follow.png)
